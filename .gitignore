@@ -1,0 +1,6 @@
+!dist/
+dist/*
+!dist/bundle/
+aot
+
+node_modules

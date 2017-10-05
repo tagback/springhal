@@ -1,0 +1,49 @@
+{
+  "name": "ng-spring-hal",
+  "version": "0.0.1",
+  "description": "A simple to use library to consume rest services published with spring data rest.",
+  "main": "./dist/bundles/springhal.umd.js",
+  "module": "./dist/index.js",
+  "typings": "./index.d.ts",
+  "keywords": [
+    "spring",
+    "hal",
+    "hateoas",
+    "angular",
+    "angular4"
+  ],
+  "author": "Christoph Ehscheidt",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tagback/springhal.git"
+  },
+  "homepage": "https://github.com/tagback/springhal",
+  "bugs": {
+    "url": "https://github.com/tagback/springhal/issues"
+  },
+
+  "scripts": {
+    "clean":"rimraf dist aot",
+    "transpile": "ngc",
+    "package": "rollup -c",
+    "minify": "uglifyjs dist/bundles/springhal.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/springhal.umd.min.js",
+    "build": "npm run clean && npm run transpile && npm run package && npm run minify"
+  },
+  "peerDependencies": {
+    "@angular/core": "^4.4.4",
+    "@angular/common": "^4.4.4",
+    "rxjs": "^5.3.0"
+  },
+  "devDependencies": {
+    "@angular/common": "^4.4.4",
+    "@angular/compiler": "^4.4.4",
+    "@angular/compiler-cli": "^4.4.4",
+    "@angular/core": "^4.4.4",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.41.6",
+    "rxjs": "^5.3.0",
+    "typescript": "^2.5.3",
+    "uglify-js": "^3.1.3"
+  }
+}
