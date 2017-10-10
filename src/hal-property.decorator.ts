@@ -29,7 +29,7 @@ export function HalLink<T extends HalModel>(clazz:{new():T},relationName?:string
     }
 }
 
-export function HalResolve<T extends HalModel>(propertyPath:string) {
+export function HalResolve(propertyPath:string) {
     return function(target:any, key:string) {
 
         if(!target[HalModelBuilder.PROTOTYPE_IDENT_HAL_RESOLVES]) {

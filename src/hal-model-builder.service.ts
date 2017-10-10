@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HalRestService } from './hal-rest.service'
 import { HalModel } from './hal-model'
 
-import { Observable } from 'rxjs/Observable';
+
 
 
 @Injectable()
@@ -85,7 +85,7 @@ export class HalModelBuilder {
     private assignResolves<T>(target:T, wantedResolves:HalResolveConfig[], restService : HalRestService) : T {
         if(!wantedResolves) return target;
         for(let conf of wantedResolves) {
-            let current : T;
+        
             restService.resolveAsyncPath(target, conf.propertyPath)
                 .subscribe(value => 
                         Object.defineProperty(target,conf.propertyKey,{

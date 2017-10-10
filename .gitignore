@@ -1,6 +1,4 @@
-!dist/
-dist/*
-!dist/bundle/
 aot
-
+coverage
+dist
 node_modules

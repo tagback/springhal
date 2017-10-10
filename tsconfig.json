@@ -1,35 +1,29 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "declaration": true,
-    "stripInternal": true,
-    "experimentalDecorators": true,
-    "strictNullChecks": true,
     "noImplicitAny": true,
-    "module": "es2015",
-    "moduleResolution": "node",
-    "paths": {
-      "@angular/core": ["node_modules/@angular/core"],
-      "@angular/common": ["node_modules/@angular/common"],
-      "@angular/common/http": ["node_modules/@angular/common/http"],
-      "rxjs/*": ["node_modules/rxjs/*"]
-    },
-    "rootDir": "./lib",
-    "outDir": "dist",
-    "sourceMap": true,
-    "inlineSources": true,
     "target": "es5",
-    "skipLibCheck": true,
-    "lib": [
-      "es2015", 
-      "dom"
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+ 
+    "lib": ["es2017", "dom"],
+    "typeRoots": [
+      "node_modules/@types"
     ]
   },
   "files": [
-    "./lib/index.ts"
+    "./src/index.ts",
+    "./test/hal-rest.service.spec.ts"
   ],
+  "exclude": [
+    "node_modules",
+    "bundles"
+  ],
+  
   "angularCompilerOptions": {
-    "genDir": "aot",
-    "strictMetadataEmit": true
+    "strictMetadataEmit": false,
+    "skipTemplateCodegen": true
   }
 }

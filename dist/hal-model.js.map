@@ -1,1 +1,1 @@
-{"version":3,"sources":["../lib/hal-model.ts"],"names":[],"mappings":"AAAA;IAAA;IAEA,CAAC;IAAD,eAAC;AAAD,CAFA,AAEC,IAAA","file":"hal-model.js","sourceRoot":"","sourcesContent":["export class HalModel {\r\n   \r\n}"]}
+{"version":3,"sources":["../src/hal-model.ts"],"names":[],"mappings":"AAAA;IAAA;IAEA,CAAC;IAAD,eAAC;AAAD,CAFA,AAEC,IAAA","file":"hal-model.js","sourceRoot":"","sourcesContent":["export class HalModel {\r\n   \r\n}"]}
