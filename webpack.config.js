@@ -2,9 +2,8 @@
  * Adapted from angular2-webpack-starter
  */
 
-const helpers = require('./config/helpers'),
-webpack = require('webpack'),
-CleanWebpackPlugin = require('clean-webpack-plugin');
+const helpers = require('./config/helpers');
+const webpack = require('webpack');
 
 /**
 * Webpack Plugins
@@ -20,13 +19,13 @@ resolve: {
     extensions: ['.ts', '.js']
 },
 
-entry: helpers.root('index.ts'),
+entry: helpers.root('./index.ts'),
 
 output: {
     path: helpers.root('bundles'),
     publicPath: '/',
-    filename: 'core.umd.js',
-    library: 'ngx-translate-core',
+    filename: 'springhal.umd.js',
+    library: 'springhal',
     libraryTarget: 'umd'
 },
 
@@ -65,12 +64,5 @@ plugins: [
         }
     }),
 
-    // Reference: https://github.com/johnagan/clean-webpack-plugin
-    // Removes the bundle folder before the build
-    new CleanWebpackPlugin(['bundles'], {
-        root: helpers.root(),
-        verbose: false,
-        dry: false
-    })
 ]
 };

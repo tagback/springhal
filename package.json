@@ -1,6 +1,6 @@
 {
   "name": "ng-spring-hal",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple to use library to consume rest services published with spring data rest.",
   "main": "./dist/bundles/springhal.umd.js",
   "module": "./dist/index.js",
@@ -23,11 +23,9 @@
     "url": "https://github.com/tagback/springhal/issues"
   },
   "scripts": {
-    "clean": "rimraf dist aot",
-    "transpile": "ngc",
-    "package": "rollup -c",
-    "minify": "uglifyjs dist/bundles/springhal.umd.js --screw-ie8 --compress --mangle --comments --output dist/bundles/springhal.umd.min.js",
-    "build": "npm run clean && npm run transpile && npm run package && npm run minify",
+    "clean": "rimraf bundles coverage",
+    "minify": "uglifyjs bundles/springhal.umd.js --screw-ie8 --compress --mangle --comments --output bundles/springhal.umd.min.js",
+    "build": "npm run clean && webpack && npm run minify",
     "test": "karma start karma.conf.js "
   },
   "peerDependencies": {
