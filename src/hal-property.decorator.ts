@@ -29,7 +29,7 @@ export function HalLink<T extends HalModel>(clazz:{new():T},relationName?:string
     }
 }
 
-export function HalResolve(propertyPath:string) {
+export function HalResolve(propertyPath:string, flatten : boolean = false) {
     return function(target:any, key:string) {
 
         if(!target[HalModelBuilder.PROTOTYPE_IDENT_HAL_RESOLVES]) {
@@ -37,7 +37,8 @@ export function HalResolve(propertyPath:string) {
         }
         target[HalModelBuilder.PROTOTYPE_IDENT_HAL_RESOLVES].push({
             propertyKey:key,
-            propertyPath:propertyPath
+            propertyPath:propertyPath,
+            flatten:flatten
         });
     }
 }

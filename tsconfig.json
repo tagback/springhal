@@ -15,7 +15,10 @@
   },
   "files": [
     "./src/**/*.ts",
-    "./test/**/*.spec.ts"
+    "./src/hal-property.decorators.ts",
+    "./test/**/*.spec.ts",
+    "./test/model.ts"
+    
   ],
   "exclude": [
     "node_modules",

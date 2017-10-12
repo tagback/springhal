@@ -29,32 +29,40 @@ export class HalRestService {
     }
 
     public resolveAsyncPath(target: HalModel, propertyPath: string): Observable<any> {
-        return this.resolveAsync(target, propertyPath.split('.'))
+            return this.resolveAsync(target, propertyPath.split('.').reverse(), false);
+    }
+
+    public resolveAsyncPathReduced(target: HalModel, propertyPath: string, reduce : (acc:any, curr:any)=>any, filter : (val:any)=>boolean = (val)=>true): Observable<any> {
+        return this.resolveAsync(target, propertyPath.split('.').reverse(), true).filter(filter).reduce(reduce);
     }
 
     public resolveAsync(target: HalModel, propertyKeys: string[], flatten: boolean = false): Observable<any> {
+        let keys = Array.from(propertyKeys);
 
-        propertyKeys = propertyKeys.reverse();
+        let obs = Observable.of(target).expand((obj:any) => {
+           
+            if (keys.length == 0) return Observable.empty();
 
-        return Observable.of(target).expand((obj:any) => {
-
-            if (propertyKeys.length == 0) return Observable.empty();
-
-            let key = propertyKeys.pop();
+            let key = keys.pop();
+           
             let resolvedObj = undefined;
             if(key) {
                 resolvedObj = obj[key];
             }
-
+            
+            
             if (obj instanceof HalModel
                 && resolvedObj instanceof Observable) {
 
                 if (flatten === true) {
+                    let k = Array.from(keys);
+                    keys.pop();
                     return resolvedObj.flatMap((o:any) => {
+                       
                         if (o instanceof Array) {
-                            let k = propertyKeys;
-                            return Observable.from(o).flatMap((o:any) => this.resolveAsync(o, k));
+                            return Observable.from(o).flatMap((o:any) =>  this.resolveAsync(o, k, flatten));
                         }
+                        
                         return Observable.of(o);
                     });
                 } else {
@@ -65,9 +73,13 @@ export class HalRestService {
                 return Observable.of(resolvedObj);
             }
 
-        }).last();
+        });
 
-
+        if(flatten) {
+            return obs;
+        } else {
+            return obs.last();
+        }
     }
     
 }

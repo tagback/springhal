@@ -1,3 +1,3 @@
-export class HalModel {
+export abstract class HalModel {
    
 }

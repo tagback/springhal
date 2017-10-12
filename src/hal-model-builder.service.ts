@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HalRestService } from './hal-rest.service'
 import { HalModel } from './hal-model'
 
-
+import {Observable} from 'rxjs/Rx'
 
 
 @Injectable()
@@ -20,8 +20,6 @@ export class HalModelBuilder {
 
 
     private parse<T>(c : {new() : T}, response:any, restService : HalRestService, relationName?:string) : T | T[]{
-        //console.log("ASSIGN:", response);
-
         if(response['_embedded']) {
 
             relationName = relationName?relationName:this.findRelationName(response);
@@ -86,16 +84,21 @@ export class HalModelBuilder {
         if(!wantedResolves) return target;
         for(let conf of wantedResolves) {
         
-            restService.resolveAsyncPath(target, conf.propertyPath)
-                .subscribe(value => 
-                        Object.defineProperty(target,conf.propertyKey,{
-                            value:value
-                        })
-                    );
-                    
-
-              
+            let obs : Observable<T>;
+            if(conf.flatten) {
+                obs = restService.resolveAsyncPathReduced(target, conf.propertyPath,(acc,curr)=>{
+                    return acc ? acc + ',' + curr : curr;
+                },(val:any)=>val && val.length > 0);
+            } else {
+                obs = restService.resolveAsyncPath(target, conf.propertyPath)
+            }
             
+            obs.subscribe(value => 
+                Object.defineProperty(target,conf.propertyKey,{
+                    value:value
+                })
+            );
+ 
         }
 
         return target;
@@ -123,6 +126,7 @@ export class HalModelBuilder {
 
             if(links[conf.relationName]) {
                 let link = links[conf.relationName];
+
                 Object.defineProperty(target,conf.propertyKey,{
                     value:restService.get<any>(link['href'],conf.clazz)
                 });
@@ -149,4 +153,5 @@ export class HalPropertyConfig {
 export class HalResolveConfig {
     propertyPath:string;
     propertyKey:string;
+    flatten:boolean;
 }
