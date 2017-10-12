@@ -2,12 +2,9 @@ import { HalModelBuilder, HalLinkConfig, HalPropertyConfig, HalResolveConfig } f
 import { HalModel } from './hal-model';
 
 export function HalProperty(relationName?:string) {
-    return function(target:any, key:string) {
-
-        if(!target[HalModelBuilder.PROTOTYPE_IDENT_HAL_PROPERTIES]) {
-            target[HalModelBuilder.PROTOTYPE_IDENT_HAL_PROPERTIES] = new Array<HalPropertyConfig>();
-        }
-        target[HalModelBuilder.PROTOTYPE_IDENT_HAL_PROPERTIES].push({
+    return function(target:HalModel, key:string) {
+        
+        target.halProperties.push({
             relationName:relationName?relationName:key,
             propertyKey:key
         });
@@ -16,12 +13,9 @@ export function HalProperty(relationName?:string) {
 }
 
 export function HalLink<T extends HalModel>(clazz:{new():T},relationName?:string) {
-    return function(target:any, key:string) {
-
-        if(!target[HalModelBuilder.PROTOTYPE_IDENT_HAL_LINKS]) {
-            target[HalModelBuilder.PROTOTYPE_IDENT_HAL_LINKS] = new Array<HalLinkConfig>();
-        }
-        target[HalModelBuilder.PROTOTYPE_IDENT_HAL_LINKS].push({
+    return function(target:HalModel, key:string) {
+        
+        target.halLinks.push({
             clazz:clazz,
             relationName:relationName?relationName:key,
             propertyKey:key
@@ -30,12 +24,9 @@ export function HalLink<T extends HalModel>(clazz:{new():T},relationName?:string
 }
 
 export function HalResolve(propertyPath:string, flatten : boolean = false) {
-    return function(target:any, key:string) {
-
-        if(!target[HalModelBuilder.PROTOTYPE_IDENT_HAL_RESOLVES]) {
-            target[HalModelBuilder.PROTOTYPE_IDENT_HAL_RESOLVES] = new Array<HalResolveConfig>();
-        }
-        target[HalModelBuilder.PROTOTYPE_IDENT_HAL_RESOLVES].push({
+    return function(target:HalModel, key:string) {
+        
+        target.halResolves.push({
             propertyKey:key,
             propertyPath:propertyPath,
             flatten:flatten

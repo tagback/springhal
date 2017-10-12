@@ -8,9 +8,7 @@ import {Observable} from 'rxjs/Rx'
 @Injectable()
 export class HalModelBuilder {
 
-    public static readonly PROTOTYPE_IDENT_HAL_PROPERTIES = 'halProperties';
-    public static readonly PROTOTYPE_IDENT_HAL_LINKS = 'halLinks';
-    public static readonly PROTOTYPE_IDENT_HAL_RESOLVES = 'halResolves';
+
 
     constructor(){}
 
@@ -19,7 +17,7 @@ export class HalModelBuilder {
     }
 
 
-    private parse<T>(c : {new() : T}, response:any, restService : HalRestService, relationName?:string) : T | T[]{
+    private parse<T extends HalModel>(c : {new() : T}, response:any, restService : HalRestService, relationName?:string) : T | T[]{
         if(response['_embedded']) {
 
             relationName = relationName?relationName:this.findRelationName(response);
@@ -53,23 +51,20 @@ export class HalModelBuilder {
         return '';
     }
 
-    private buildObject<T extends any>(c:{new():T}, content:any, restService : HalRestService) : T {
+    private buildObject<T extends HalModel>(c:{new():T}, content:any, restService : HalRestService) : T {
         let instance = new c();
-        let wantedProperties = instance[HalModelBuilder.PROTOTYPE_IDENT_HAL_PROPERTIES];
-        let wantedLinks = instance[HalModelBuilder.PROTOTYPE_IDENT_HAL_LINKS];
-        let wantedResolves = instance[HalModelBuilder.PROTOTYPE_IDENT_HAL_RESOLVES];
-
-        instance = this.assignProperties(instance, wantedProperties, content);
-        instance = this.assignLinks(instance, wantedLinks, content, restService);
+      
+        instance = this.assignProperties(instance, content);
+        instance = this.assignLinks(instance, content, restService);
         instance = this.assignContent(instance, content['content']);
-        instance = this.assignResolves(instance, wantedResolves, restService);
+        instance = this.assignResolves(instance, restService);
 
         return instance;
     }
 
-    private assignProperties<T>(target:T, wantedProperties:HalPropertyConfig[], content:any) : T {
-        if(!wantedProperties) return target;
-        for(let conf of wantedProperties) {   
+    private assignProperties<T extends HalModel>(target:T, content:any) : T {
+      
+        for(let conf of target.halProperties) {   
             if(content[conf.relationName]) {
                 Object.defineProperty(target,conf.propertyKey,{
                     value:content[conf.relationName]
@@ -80,9 +75,9 @@ export class HalModelBuilder {
         return target;
     }
 
-    private assignResolves<T>(target:T, wantedResolves:HalResolveConfig[], restService : HalRestService) : T {
-        if(!wantedResolves) return target;
-        for(let conf of wantedResolves) {
+    private assignResolves<T extends HalModel>(target:T, restService : HalRestService) : T {
+        
+        for(let conf of target.halResolves) {
         
             let obs : Observable<T>;
             if(conf.flatten) {
@@ -104,7 +99,7 @@ export class HalModelBuilder {
         return target;
     }
 
-    private assignContent<T>(target:T, content:any) : T {
+    private assignContent<T extends HalModel>(target:T, content:any) : T {
         if(!content) return target;
 
         for(let propKey in content) {   
@@ -116,19 +111,21 @@ export class HalModelBuilder {
         return target;
     }
 
-    private assignLinks<T>(target:T, wantedLinks:HalLinkConfig[], content:any, restService : HalRestService) : T {
-        if(!wantedLinks) return target;
+    private assignLinks<T extends HalModel>(target:T, content:any, restService : HalRestService) : T {
+       
 
         let links = content['_links'];
         if(!links) return target;
 
-        for(let conf of wantedLinks) {   
+        for(let conf of target.halLinks) {   
 
             if(links[conf.relationName]) {
                 let link = links[conf.relationName];
 
+                target.addPlainLinks(conf.relationName, link.href);
+
                 Object.defineProperty(target,conf.propertyKey,{
-                    value:restService.get<any>(link['href'],conf.clazz)
+                    value:restService.get<any>(link.href,conf.clazz)
                 });
             }
         }
