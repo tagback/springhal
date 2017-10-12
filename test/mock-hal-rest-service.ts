@@ -20,7 +20,6 @@ export class MockHalRestService extends HalRestService {
     
     public get<T extends HalModel>(uri: string, c: { new(): T }): Observable<T | T[]> {
         let match = this.matchers[uri];
-        console.log(this.matchers, match);
         if(match) {
             return Observable.of(match).map(res => this._builder.build(c, res, this));
         }

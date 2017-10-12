@@ -31,6 +31,6 @@ export class FlatResolveTestModel extends HalModel {
     @HalLink(TestModel)
     link : Observable<TestModel[]>;
 
-    @HalResolve('link.test',true)
+    @HalResolve('link.testLinks.test',true)
     resolve : string;
 }

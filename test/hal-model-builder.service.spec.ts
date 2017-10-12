@@ -226,7 +226,6 @@ describe('HalModelBuilder', () => {
     it('buildResolvedFlatten', inject([HttpTestingController],
         (http: HttpTestingController) => { 
 
-
         let builder = TestBed.get(HalModelBuilder);
         let restService = TestBed.get(HalRestService);
              
@@ -240,27 +239,53 @@ describe('HalModelBuilder', () => {
            
         let model : FlatResolveTestModel = builder.build(FlatResolveTestModel,response,restService);
         expect(model).toBeDefined();
-       
 
         http.expectOne('first').flush(
             {
                 "_embedded":{
                     "tests":[
-                        {"test":"test1"},
-                        {"test":"test2"}
+                        {
+                            "_links":{
+                                "testLinks":{
+                                    "href":"second"
+                                }
+                            }
+                        },
+                        {
+                            "_links":{
+                             "testLinks":{
+                                "href":"third"
+                                }
+                            }
+                        }
                     ]
                 }
             }
-        );
+        ); 
 
-      
+        http.expectOne('second').flush(
+            {
+                "_embedded":{
+                    "tests":[
+                        {"test":"1"},
+                        {"test":"2"}
+                    ]
+                }
+            }
+        ); 
+        http.expectOne('third').flush(
+            {
+                "_embedded":{
+                    "tests":[
+                        {"test":"3"},
+                        {"test":"4"}
+                    ]
+                }
+            }
+        ); 
         expect(model.resolve).toBeDefined();
-        expect(model.resolve).toBe('test1,test2');
-       
-
-     
-
-        
-        
+        expect(model.resolve).toBe('1,2,3,4'); 
     }));
+
+
 });
