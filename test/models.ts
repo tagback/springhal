@@ -1,4 +1,4 @@
-import { HalProperty,HalLink,HalResolve, HalModel } from '../';
+import { HalProperty,HalLink,HalResolve, HalModel,HalPage } from '../';
 import {Observable} from 'rxjs/Rx';
 
 export class TestModel extends HalModel {
@@ -13,7 +13,7 @@ export class TestModel extends HalModel {
     namedLink : Observable<TestModel>;
 
     @HalLink(TestModel)
-    testLinks : Observable<TestModel[]>;
+    testLinks : Observable<HalPage<TestModel>>;
 
 
 }
@@ -29,7 +29,7 @@ export class ResolveTestModel extends HalModel {
 
 export class FlatResolveTestModel extends HalModel {
     @HalLink(TestModel)
-    link : Observable<TestModel[]>;
+    link : Observable<HalPage<TestModel>>;
 
     @HalResolve('link.testLinks.test',true)
     resolve : string;

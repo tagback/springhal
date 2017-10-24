@@ -1,23 +1,48 @@
 import { Injectable } from '@angular/core';
 import { HalRestService } from './hal-rest.service'
-import { HalModel } from './hal-model'
+import { HalModel,HalPage } from './hal-model'
 
 import {Observable} from 'rxjs/Rx'
 
 
 @Injectable()
 export class HalModelBuilder {
-
-
-
     constructor(){}
 
-    public build<T extends HalModel>(c : {new() : T}, res : any, restService : HalRestService ) : T | T[]{
+    public build<T extends HalModel>(c : {new() : T}, res : any, restService : HalRestService ) : T | HalPage<T>{
         return this.parse<T>(c, res, restService);
     }
 
+    public toJson<T extends HalModel>(model:T|HalPage<T>) : string {
+       
+        if(model instanceof HalPage) {
+            let str = '[';
+            for(let i = 0; i < model.data.length; i++) {
+                str += this.toJson(model.data[i]);
+                if(i+1 < model.data.length) str += ',';
+            }
+            str += ']';
+            return str;
 
-    private parse<T extends HalModel>(c : {new() : T}, response:any, restService : HalRestService, relationName?:string) : T | T[]{
+        } else if(model instanceof HalModel){
+            let cleanModel :any = {};
+            for(let conf of model.halProperties) {   
+                cleanModel[conf.relationName] = (<any>model)[conf.relationName];
+            }
+    
+            for(let conf of model.halLinks) {
+                cleanModel[conf.relationName] = model.plainLinks[conf.relationName];
+            }
+
+            return JSON.stringify(cleanModel);
+        }
+
+
+        return '';
+    }
+
+
+    private parse<T extends HalModel>(c : {new() : T}, response:any, restService : HalRestService, relationName?:string) : T | HalPage<T>{
         if(response['_embedded']) {
 
             relationName = relationName?relationName:this.findRelationName(response);
@@ -27,7 +52,7 @@ export class HalModelBuilder {
                 for(let objectContent of contentArray) {
                     content.push(this.buildObject<T>(c, objectContent, restService));
                 }
-                return content;
+                return new HalPage(content);
             } else {
                 console.error("Can't parse array result: ", response['_embedded'], relationName);
             }
@@ -128,6 +153,10 @@ export class HalModelBuilder {
                     value:restService.get<any>(link.href,conf.clazz)
                 });
             }
+       }
+
+        if(links._self) {
+            target.addPlainLinks('_self', links._self.href);
         }
 
         return target;

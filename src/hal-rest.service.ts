@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient,HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { HalModelBuilder } from './hal-model-builder.service';
-import { HalModel } from './hal-model';
+import { HalModel,HalPage } from './hal-model';
 
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
@@ -20,12 +20,29 @@ export class HalRestService {
         private _modelBuilder: HalModelBuilder) {
     }
 
-    public get<T extends HalModel>(uri: string, c: { new(): T }): Observable<T | T[]> {
-
-        return this._httpClient.get<Object>(uri)
+    public get<T extends HalModel>(uri: string, c: { new(): T }): Observable<T | HalPage<T>> {
+        let headers = new HttpHeaders({ 'Content-Type': 'application/hal+json' });
+        return this._httpClient.get<Object>(uri,{headers:headers})
             .map(res => this._modelBuilder.build(c, res, this));
+    }
 
+    public post<T extends HalModel>(uri:string, object:T) : Observable<T> {
+        let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        return this._httpClient.post<T>(uri, this._modelBuilder.toJson(object),{headers:headers});
+    }
 
+    public patch<T extends HalModel>(model:T) : Observable<T> {
+        let headers = new HttpHeaders({ 'Content-Type': 'application/merge-patch+json' });
+        return this._httpClient.patch<T>(model.selfHref, this._modelBuilder.toJson(model),{headers:headers});
+    }
+
+    public put<T extends HalModel>(model:T) : Observable<T> {
+        let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+        return this._httpClient.put<T>(model.selfHref, this._modelBuilder.toJson(model),{headers:headers});
+    }
+
+    public delete<T extends HalModel>(model:T) : Observable<number> {
+        return this._httpClient.delete(model.selfHref, {observe: 'response'}).map(response => response.status);
     }
 
     public resolveAsyncPath(target: HalModel, propertyPath: string): Observable<any> {
@@ -58,9 +75,9 @@ export class HalRestService {
                     let k = Array.from(keys);
                     keys.pop();
                     return resolvedObj.flatMap((o:any) => {
-                       
-                        if (o instanceof Array) {
-                            return Observable.from(o).flatMap((o:any) =>  this.resolveAsync(o, k, flatten));
+                       console.log(o);
+                        if (o instanceof HalPage) {
+                            return Observable.from(o.data).flatMap((o:any) =>  this.resolveAsync(o, k, flatten));
                         }
                         
                         return Observable.of(o);

@@ -3,11 +3,10 @@ import { TestBed,inject } from '@angular/core/testing';
 
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-import { HalRestService } from '../index';
+import { HalRestService,HalPage } from '../index';
 import { SpringHalModule } from '../src/spring-hal.module';
 import { HalModelBuilder } from '../src/hal-model-builder.service';
 import { TestModel ,ResolveTestModel, FlatResolveTestModel} from './models';
-import {MockHalRestService} from './mock-hal-rest-service';
 
 describe('HalModelBuilder', () => {
 
@@ -48,11 +47,11 @@ describe('HalModelBuilder', () => {
             }
         };
 
-        let model : TestModel[] = builder.build(TestModel,response,restService);
+        let model : HalPage<TestModel> = builder.build(TestModel,response,restService);
         
-        expect(model.length).toBe(2);
-        expect(model[0].test).toBe("test1");
-        expect(model[1].test).toBe("test2");
+        expect(model.data.length).toBe(2);
+        expect(model.data[0].test).toBe("test1");
+        expect(model.data[1].test).toBe("test2");
         
     });
 
@@ -161,10 +160,10 @@ describe('HalModelBuilder', () => {
         expect(model).toBeDefined();
         expect(model.testLinks).toBeDefined();
 
-        model.testLinks.subscribe((link:TestModel[]) => {
-            expect(link.length).toBe(2);
-            expect(link[0].test).toBe('test1');
-            expect(link[1].test).toBe('test2');
+        model.testLinks.subscribe((link:HalPage<TestModel>) => {
+            expect(link.data.length).toBe(2);
+            expect(link.data[0].test).toBe('test1');
+            expect(link.data[1].test).toBe('test2');
         });
 
         http.expectOne('http://whatever.to.test').flush(
@@ -185,8 +184,7 @@ describe('HalModelBuilder', () => {
 
 
         let builder = TestBed.get(HalModelBuilder);
-        let restService = new MockHalRestService(builder);
-        
+        let restService = TestBed.get(HalRestService);
      
         const response = {
             "_links":{
@@ -196,7 +194,12 @@ describe('HalModelBuilder', () => {
             }
         };
            
-        restService.match('first',
+        
+
+        let model : ResolveTestModel = builder.build(ResolveTestModel,response, restService);
+        expect(model).toBeDefined();
+
+        http.expectOne('first').flush(
             {
                 "_links":{
                     "testLink":{
@@ -205,21 +208,15 @@ describe('HalModelBuilder', () => {
                 }
             }
         );
-
-        restService.match('second',
+        http.expectOne('second').flush(
             {
                 "test":"testText"
             }
         );
 
-        let model : ResolveTestModel = builder.build(ResolveTestModel,response,restService);
-        expect(model).toBeDefined();
+      
         expect(model.resolve).toBeDefined();
         expect(model.resolve).toBe('testText');
-
-     
-
-        
         
     }));
 
@@ -287,5 +284,62 @@ describe('HalModelBuilder', () => {
         expect(model.resolve).toBe('1,2,3,4'); 
     }));
 
+    it('hasSelfHrefSet()', inject([HttpTestingController],
+        (http: HttpTestingController) => { 
+
+        let builder = TestBed.get(HalModelBuilder);
+        let restService = TestBed.get(HalRestService);
+             
+        const response = {
+            "_links":{
+                "_self":{
+                    "href":"blub:/"
+                }
+            }
+        };
+           
+        let model : TestModel = builder.build(TestModel,response,restService);
+        expect(model).toBeDefined();
+
+        expect(model.selfHref).toBe('blub:/');
+
+       
+    }));
+
+    it('toJson()', inject([HalModelBuilder,HttpTestingController,HalRestService],
+        (builder: HalModelBuilder, http: HttpTestingController, restService: HalRestService) => { 
+             
+        const response = {
+            "content":{
+                "test":"test"
+                    
+            }
+        };
+           
+        let model = builder.build(TestModel,response, restService);
+    
+        let json = builder.toJson(model);
+        expect(json).toBeDefined();
+        expect(json).toBe('{"test":"test"}'); 
+    }));
+
+    it('toJson(array)', inject([HalModelBuilder,HttpTestingController,HalRestService],
+        (builder: HalModelBuilder, http: HttpTestingController, restService: HalRestService) => { 
+             
+        const response = {
+            "_embedded":{
+                "tests":[
+                    {"test":"test1"},
+                    {"test":"test2"}
+                ]
+            }
+        };
+           
+        let model = builder.build(TestModel,response, restService);
+    
+        let json = builder.toJson(model);
+        expect(json).toBeDefined();
+        expect(json).toBe('[{"test":"test1"},{"test":"test2"}]'); 
+    }));
 
 });
